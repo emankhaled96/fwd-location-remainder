@@ -80,7 +80,7 @@ class SaveReminderFragment : BaseFragment() {
                 requestForegroundAndBackgroundLocationPermissions()
             }
 
-            _viewModel.saveReminder(
+            _viewModel.validateAndSaveReminder(
                 ReminderDataItem(
                     title,
                     description,
