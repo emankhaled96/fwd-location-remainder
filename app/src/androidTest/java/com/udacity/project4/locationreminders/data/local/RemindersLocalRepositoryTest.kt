@@ -50,14 +50,20 @@ class RemindersLocalRepositoryTest {
 
     @Test
     fun saveRemainders_GetAllRemainders() = runBlocking {
+       // GIVEN : New Remainder and Save it
         val newRemainder = ReminderDTO(
             "title 1",
             "description 1",
             "location 1",
             0.0, 0.0
         )
+
         repository.saveReminder(newRemainder)
+
+        // WHEN : get remainders
         val result = repository.getReminders()
+
+        // THEN: Verify result
         Assert.assertThat(result.succeeded, `is`(true))
 
         result as Result.Success
