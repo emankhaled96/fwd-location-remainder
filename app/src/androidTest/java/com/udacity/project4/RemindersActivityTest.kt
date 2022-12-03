@@ -4,11 +4,16 @@ import android.app.Application
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.ViewAssertion
+import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -16,6 +21,7 @@ import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
@@ -108,11 +114,11 @@ class RemindersActivityTest :
         runBlocking { repository.deleteAllReminders() }
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
-        Espresso.onView(withId(R.id.noDataTextView))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(withId(R.id.noDataTextView)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(
+        onView(withId(R.id.noDataTextView))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.noDataTextView)).check(
+            matches(
+                withText(
                     appContext.getString(R.string.no_data)
                 )
             )
@@ -127,34 +133,34 @@ class RemindersActivityTest :
             "title",
             "description",
             "location",
-            0.0,0.0
+            0.0, 0.0
         )
         runBlocking { repository.saveReminder(remainder) }
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
         dataBindingIdlingResource.monitorActivity(activityScenario)
-        Espresso.onView(withId(R.id.title))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(withId(R.id.title)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(
+        onView(withId(R.id.title))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.title)).check(
+            matches(
+                withText(
                     "title"
                 )
             )
         )
-        Espresso.onView(withId(R.id.description))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(withId(R.id.description)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(
+        onView(withId(R.id.description))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.description)).check(
+            matches(
+                withText(
                     "description"
                 )
             )
         )
-        Espresso.onView(withId(R.id.location))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(withId(R.id.location)).check(
-            ViewAssertions.matches(
-                ViewMatchers.withText(
+        onView(withId(R.id.location))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.location)).check(
+            matches(
+                withText(
                     "location"
                 )
             )
@@ -163,4 +169,122 @@ class RemindersActivityTest :
 
     }
 
+    @Test
+    fun navigateToAddRemainder_addData_returnToRemainderList() {
+        runBlocking { repository.deleteAllReminders() }
+        val remainder = ReminderDTO(
+            "title",
+            "description",
+            "location",
+            0.0, 0.0
+        )
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+        onView(withId(R.id.noDataTextView))
+            .check(matches(withText(appContext.getString(R.string.no_data))))
+        onView(withId(R.id.addReminderFAB))
+            .perform(click())
+        onView(withId(R.id.reminderTitle))
+            .perform(ViewActions.typeText(remainder.title))
+        onView(withId(R.id.reminderDescription))
+            .perform(ViewActions.typeText(remainder.description))
+        val saveReminderViewModel: SaveReminderViewModel = get()
+
+//        runBlocking {saveReminderViewModel.validateAndSaveReminderWithoutLocationForTesting(remainder)}
+        saveReminderViewModel.reminderSelectedLocationStr.postValue(remainder.location)
+        saveReminderViewModel.latitude.postValue(remainder.latitude)
+        saveReminderViewModel.longitude.postValue( remainder.longitude)
+        Espresso.closeSoftKeyboard()
+        onView(withId(R.id.saveReminder))
+            .perform(click())
+
+        onView(withId(R.id.title)).check(
+            matches(
+                withText(
+                    remainder.title
+                )
+            )
+        )
+     onView(withId(R.id.description)).check(
+            matches(
+               withText(
+                    remainder.description
+                )
+            )
+        )
+
+        activityScenario.close()
+    }
+
+    @Test
+    fun navigateToAddRemainder_addDataWithTitleError_returnToRemainderList() {
+        runBlocking { repository.deleteAllReminders() }
+        val remainder = ReminderDTO(
+            null,
+            "description",
+            "location",
+            0.0, 0.0
+        )
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+        onView(withId(R.id.noDataTextView))
+            .check(matches(withText(appContext.getString(R.string.no_data))))
+       onView(withId(R.id.addReminderFAB))
+            .perform(click())
+
+      onView(withId(R.id.reminderDescription))
+            .perform(ViewActions.typeText(remainder.description))
+        val saveReminderViewModel: SaveReminderViewModel = get()
+
+        saveReminderViewModel.reminderSelectedLocationStr.postValue(remainder.location)
+        saveReminderViewModel.latitude.postValue(remainder.latitude)
+        saveReminderViewModel.longitude.postValue( remainder.longitude)
+        Espresso.closeSoftKeyboard()
+        onView(withId(R.id.saveReminder))
+            .perform(click())
+
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText(R.string.err_enter_title
+            )))
+
+
+
+        activityScenario.close()
+    }
+    @Test
+    fun navigateToAddRemainder_addDataWithLocationError_returnToRemainderList() {
+        runBlocking { repository.deleteAllReminders() }
+        val remainder = ReminderDTO(
+            "title",
+            "description",
+            null,
+            0.0, 0.0
+        )
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+        onView(withId(R.id.noDataTextView))
+            .check(matches(withText(appContext.getString(R.string.no_data))))
+        onView(withId(R.id.addReminderFAB))
+            .perform(click())
+        onView(withId(R.id.reminderTitle))
+            .perform(ViewActions.typeText(remainder.title))
+        onView(withId(R.id.reminderDescription))
+            .perform(ViewActions.typeText(remainder.description))
+        val saveReminderViewModel: SaveReminderViewModel = get()
+
+        saveReminderViewModel.reminderSelectedLocationStr.postValue(remainder.location)
+        saveReminderViewModel.latitude.postValue(remainder.latitude)
+        saveReminderViewModel.longitude.postValue( remainder.longitude)
+        Espresso.closeSoftKeyboard()
+        onView(withId(R.id.saveReminder))
+            .perform(click())
+
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText(R.string.err_select_location
+            )))
+
+
+
+        activityScenario.close()
+    }
 }

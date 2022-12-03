@@ -189,10 +189,10 @@ class SaveReminderFragment : BaseFragment() {
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
                 try {
-                    exception.startResolutionForResult(
-                        requireActivity(),
-                        REQUEST_TURN_DEVICE_LOCATION_ON
-                    )
+                    startIntentSenderForResult(
+                        exception.resolution.intentSender,
+                        REQUEST_TURN_DEVICE_LOCATION_ON,
+                        null, 0, 0, 0, null                    )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Log.d(TAG, "Error getting location settings resolution: " + sendEx.message)
                 }
@@ -215,21 +215,25 @@ class SaveReminderFragment : BaseFragment() {
     private fun addGeofenceForClue() {
 
 
-        val geofence = Geofence.Builder()
-            .setRequestId(_viewModel.reminderSelectedLocationStr.value!!)
-            .setCircularRegion(
-                _viewModel.latitude.value!!,
-                _viewModel.longitude.value!!,
-                GEOFENCE_RADIUS_IN_METERS
-            )
-            .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-            .build()
+        val geofence = _viewModel.reminderSelectedLocationStr.value?.let {
+            Geofence.Builder()
+                .setRequestId(it)
+                .setCircularRegion(
+                    _viewModel.latitude.value!!,
+                    _viewModel.longitude.value!!,
+                    GEOFENCE_RADIUS_IN_METERS
+                )
+                .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                .build()
+        }
 
-        val geofencingRequest = GeofencingRequest.Builder()
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            .addGeofence(geofence)
-            .build()
+        val geofencingRequest = geofence?.let {
+            GeofencingRequest.Builder()
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .addGeofence(it)
+                .build()
+        }
 
         geofencingClient.removeGeofences(geofencePendingIntent).run {
             addOnCompleteListener {
@@ -246,22 +250,24 @@ class SaveReminderFragment : BaseFragment() {
                     // for ActivityCompat#requestPermissions for more details.
                     return@addOnCompleteListener
                 }
-                geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
-                    addOnSuccessListener {
-                        Toast.makeText(
-                            requireContext(), R.string.geofences_added,
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
-                        Log.e("Add Geofence", geofence.requestId)
-                    }
-                    addOnFailureListener {
-                        Toast.makeText(
-                            requireContext(), R.string.geofences_not_added,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        if ((it.message != null)) {
-                            Log.w(TAG, it.message!!)
+                if (geofencingRequest != null) {
+                    geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
+                        addOnSuccessListener {
+                            Toast.makeText(
+                                requireContext(), R.string.geofences_added,
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                            Log.e("Add Geofence", geofence.requestId)
+                        }
+                        addOnFailureListener {
+                            Toast.makeText(
+                                requireContext(), R.string.geofences_not_added,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            if ((it.message != null)) {
+                                Log.w(TAG, it.message!!)
+                            }
                         }
                     }
                 }
