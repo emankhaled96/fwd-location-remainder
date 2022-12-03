@@ -108,7 +108,6 @@ class RemindersActivityTest :
         IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
     }
 
-    //    TODO: add End to End testing to the app
     @Test
     fun remainderListFragment_withNoData() {
         runBlocking { repository.deleteAllReminders() }
