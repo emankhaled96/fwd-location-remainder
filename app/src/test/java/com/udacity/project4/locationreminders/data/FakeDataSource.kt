@@ -4,43 +4,41 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 
 //Use FakeDataSource that acts as a test double to the LocalDataSource
-class FakeDataSource(var remainders: MutableList<ReminderDTO>? = mutableListOf()) :
+class FakeDataSource(var remainders: MutableList<ReminderDTO> = mutableListOf()) :
     ReminderDataSource {
     private var returnError = false
 
     fun setError(value: Boolean) {
-    returnError = value
+        returnError = value
     }
 
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
-        if (returnError) {
-            return com.udacity.project4.locationreminders.data.dto.Result.Error("Remainders not found")
-        } else {
-            remainders?.let { return Result.Success(ArrayList(it)) }
+        try {
+            remainders.let { return Result.Success(ArrayList(it)) }
+        } catch (e: Exception) {
             return Result.Error(
-                "Remainders not found"
+                e.localizedMessage
             )
         }
+
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
-        remainders?.add(reminder)
+        remainders.add(reminder)
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        remainders?.firstOrNull { it.id == id }.let {
-            if (it != null) {
-                return Result.Success(it)
-            } else {
-                return Result.Error("remainder not found")
-            }
+        return try {
+            Result.Success(data = remainders.firstOrNull { it.id == id}!!)
+        }catch (e:Exception){
+            Result.Error(e.localizedMessage)
         }
 
     }
 
 
     override suspend fun deleteAllReminders() {
-        remainders?.clear()
+        remainders.clear()
     }
 
 

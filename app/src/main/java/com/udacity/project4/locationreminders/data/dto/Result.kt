@@ -11,4 +11,4 @@ sealed class Result<out T : Any> {
         Result<Nothing>()
 }
 val Result<*>.succeeded
-    get() = this is Result.Success && data != null
+    get() = this is Result.Success

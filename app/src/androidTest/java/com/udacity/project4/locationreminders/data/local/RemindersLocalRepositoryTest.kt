@@ -49,8 +49,44 @@ class RemindersLocalRepositoryTest {
     }
 
     @Test
+    fun saveRemainder_getRemainderByID_Success() = runBlocking {
+        // GIVEN : New Remainder and Save it
+        val newRemainder = ReminderDTO(
+            "title 1",
+            "description 1",
+            "location 1",
+            0.0, 0.0,"R1"
+        )
+
+        repository.saveReminder(newRemainder)
+        // WHEN : get remainder by Id
+        val result = repository.getReminder(newRemainder.id)
+        // THEN: Verify result
+        
+        result as Result.Success
+        result.data.let{
+            assertThat(it.title, `is`(newRemainder.title))
+            assertThat(it.description, `is`(newRemainder.description))
+            assertThat(it.longitude, `is`(newRemainder.longitude))
+            assertThat(it.latitude, `is`(newRemainder.latitude))
+            assertThat(it.location, `is`(newRemainder.location))
+
+        }
+    }
+    @Test
+    fun saveRemainder_getRemainderByID_Error() = runBlocking {
+        // GIVEN : New Remainder and Save it
+       repository.deleteAllReminders()
+        // WHEN : get remainder by Id
+        val result = repository.getReminder("R1")
+        // THEN: Verify result
+
+        result as Result.Error
+        assertThat(result.message, `is`("Reminder not found!"))
+    }
+    @Test
     fun saveRemainders_GetAllRemainders() = runBlocking {
-       // GIVEN : New Remainder and Save it
+        // GIVEN : New Remainder and Save it
         val newRemainder = ReminderDTO(
             "title 1",
             "description 1",
@@ -68,11 +104,11 @@ class RemindersLocalRepositoryTest {
 
         result as Result.Success
         result.data.forEach {
-            assertThat(it.title , `is`("title 1"))
-            assertThat(it.description , `is`("description 1"))
-            assertThat(it.longitude , `is`(0.0))
-            assertThat(it.latitude , `is`(0.0))
-            assertThat(it.location , `is`("location 1"))
+            assertThat(it.title, `is`("title 1"))
+            assertThat(it.description, `is`("description 1"))
+            assertThat(it.longitude, `is`(0.0))
+            assertThat(it.latitude, `is`(0.0))
+            assertThat(it.location, `is`("location 1"))
 
         }
     }

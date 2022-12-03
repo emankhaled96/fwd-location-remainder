@@ -75,8 +75,6 @@ class RemindersListViewModelTest {
         remainderListViewModel.loadReminders()
         Assert.assertEquals("Remainders not found" , remainderListViewModel.showSnackBar.getOrAwaitValue())
 
-
-
     }
     @After
     fun clear(){

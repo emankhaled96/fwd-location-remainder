@@ -10,6 +10,7 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.databinding.DataBindingUtil
@@ -26,6 +27,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
+import java.util.*
 
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
@@ -114,6 +116,26 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
         else -> super.onOptionsItemSelected(item)
     }
+    private fun setMapLongClick(map: GoogleMap) {
+        map.setOnMapLongClickListener { latLng ->
+
+            val snippet = String.format(
+                Locale.getDefault(),
+                "Lat: %1$.5f , Long: %2$.5f",
+                latLng.latitude,
+                latLng.longitude
+            )
+            map.addMarker(
+                MarkerOptions().position(latLng)
+                    .title(getString(R.string.dropped_pin))
+                    .snippet(snippet)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+            )
+            _viewModel.latitude.value = latLng.latitude
+            _viewModel.longitude.value = latLng.longitude
+            _viewModel.reminderSelectedLocationStr.value = getString(R.string.dropped_pin)
+        }
+    }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
@@ -126,6 +148,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         enableMyLocation()
         setMapStyle(map)
         setPoiClick(map)
+        setMapLongClick(map)
 
     }
 
@@ -136,8 +159,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
 
         } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
+            _viewModel.showToast.postValue("You should grantee The permission to be able to use the application")
+            requestPermissions(
                 arrayOf<String>(android.Manifest.permission.ACCESS_FINE_LOCATION),
                 REQUEST_LOCATION_PERMISSION
             )
