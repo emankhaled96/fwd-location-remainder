@@ -83,8 +83,6 @@ class SaveReminderFragment : BaseFragment() {
             } else {
                 requestForegroundAndBackgroundLocationPermissions()
             }
-
-
         }
     }
 
@@ -104,9 +102,8 @@ class SaveReminderFragment : BaseFragment() {
     }
 
     private fun addRemainder() {
-
         _viewModel.validateAndSaveReminder(
-           getRemainder()
+            getRemainder()
         )
     }
 
@@ -231,20 +228,17 @@ class SaveReminderFragment : BaseFragment() {
 
     @SuppressLint("MissingPermission")
     private fun addGeofenceForClue() {
-
-
-        val geofence = getRemainder().let {
-            Geofence.Builder()
-                .setRequestId(it.id)
+        val geofence = Geofence.Builder()
+                .setRequestId(getRemainder().id)
                 .setCircularRegion(
-                    _viewModel.latitude.value!!,
-                    _viewModel.longitude.value!!,
+                    _viewModel.latitude.value ?: 0.0,
+                    _viewModel.longitude.value ?: 0.0,
                     GEOFENCE_RADIUS_IN_METERS
                 )
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .build()
-        }
+
 
         val geofencingRequest = geofence.let {
             GeofencingRequest.Builder()
