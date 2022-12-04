@@ -31,6 +31,7 @@ import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
+import com.udacity.project4.utils.createChannel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 import java.util.concurrent.TimeUnit
@@ -61,6 +62,8 @@ class SaveReminderFragment : BaseFragment() {
 
         binding.viewModel = _viewModel
         geofencingClient = LocationServices.getGeofencingClient(requireActivity())
+        createChannel(requireContext())
+
         return binding.root
     }
 
@@ -238,7 +241,7 @@ class SaveReminderFragment : BaseFragment() {
                     _viewModel.longitude.value!!,
                     GEOFENCE_RADIUS_IN_METERS
                 )
-                .setExpirationDuration(GEOFENCE_EXPIRATION_IN_MILLISECONDS)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
                 .build()
         }
@@ -294,4 +297,3 @@ private const val REQUEST_TURN_DEVICE_LOCATION_ON = 29
 private const val TAG = "SaveRemainderFragment"
 private const val LOCATION_PERMISSION_INDEX = 0
 private const val BACKGROUND_LOCATION_PERMISSION_INDEX = 1
-val GEOFENCE_EXPIRATION_IN_MILLISECONDS: Long = TimeUnit.HOURS.toMillis(24)

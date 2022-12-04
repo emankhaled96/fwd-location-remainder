@@ -70,15 +70,16 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun getRemainders_testError(){
+    fun getRemainders_testError() {
         dataSource.setError(true)
         remainderListViewModel.loadReminders()
-        Assert.assertEquals("Remainders not found" , remainderListViewModel.showSnackBar.getOrAwaitValue())
+        Assert.assertEquals("Test Exception", remainderListViewModel.showSnackBar.getOrAwaitValue())
 
     }
+
     @After
-    fun clear(){
-   stopKoin()
+    fun clear() {
+        stopKoin()
     }
 
 }

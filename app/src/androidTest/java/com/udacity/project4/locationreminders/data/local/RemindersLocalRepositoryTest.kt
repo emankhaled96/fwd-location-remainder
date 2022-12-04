@@ -76,6 +76,7 @@ class RemindersLocalRepositoryTest {
     @Test
     fun saveRemainder_getRemainderByID_Error() = runBlocking {
         // GIVEN : New Remainder and Save it
+
        repository.deleteAllReminders()
         // WHEN : get remainder by Id
         val result = repository.getReminder("R1")

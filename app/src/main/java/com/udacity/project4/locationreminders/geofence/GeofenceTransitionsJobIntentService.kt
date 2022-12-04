@@ -36,7 +36,6 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     override fun onHandleWork(intent: Intent) {
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         geofencingEvent?.triggeringGeofences?.let { sendNotification(it) }
-
     }
 
     private fun sendNotification(triggeringGeofences: List<Geofence>) {

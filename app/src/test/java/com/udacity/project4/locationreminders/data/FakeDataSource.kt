@@ -13,13 +13,10 @@ class FakeDataSource(var remainders: MutableList<ReminderDTO> = mutableListOf())
     }
 
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
-        try {
-            remainders.let { return Result.Success(ArrayList(it)) }
-        } catch (e: Exception) {
-            return Result.Error(
-                e.localizedMessage
-            )
-        }
+     if(returnError){
+         return Result.Error("Test Exception")
+     }
+       return Result.Success(remainders)
 
     }
 
@@ -28,11 +25,11 @@ class FakeDataSource(var remainders: MutableList<ReminderDTO> = mutableListOf())
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        return try {
-            Result.Success(data = remainders.firstOrNull { it.id == id}!!)
-        }catch (e:Exception){
-            Result.Error(e.localizedMessage)
+        if(returnError){
+            return Result.Error("Test Exception")
         }
+        return Result.Success(data = remainders.firstOrNull { it.id == id}!!)
+
 
     }
 
