@@ -3,7 +3,6 @@ package com.udacity.project4.locationreminders.savereminder
 import android.Manifest
 import android.annotation.SuppressLint
 import android.annotation.TargetApi
-import android.app.Fragment
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentSender
@@ -18,7 +17,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
@@ -34,7 +32,6 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.createChannel
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
-import java.util.concurrent.TimeUnit
 
 @RequiresApi(Build.VERSION_CODES.S)
 class SaveReminderFragment : BaseFragment() {
@@ -101,13 +98,12 @@ class SaveReminderFragment : BaseFragment() {
         )
     }
 
-    private fun addRemainder() {
+    private fun addRemainder(remainder: ReminderDataItem) {
         _viewModel.validateAndSaveReminder(
-            getRemainder()
+            remainder
         )
     }
 
-    @TargetApi(29)
     private fun foregroundAndBackgroundLocationPermissionApproved(): Boolean {
         //First, check if the ACCESS_FINE_LOCATION permission is granted.
         val foregroundLocationApproved = (
@@ -134,7 +130,6 @@ class SaveReminderFragment : BaseFragment() {
     /*
      *  Requests ACCESS_FINE_LOCATION and (on Android 10+ (Q) ACCESS_BACKGROUND_LOCATION.
      */
-    @TargetApi(29)
     private fun requestForegroundAndBackgroundLocationPermissions() {
         if (foregroundAndBackgroundLocationPermissionApproved())
             return
@@ -228,16 +223,17 @@ class SaveReminderFragment : BaseFragment() {
 
     @SuppressLint("MissingPermission")
     private fun addGeofenceForClue() {
+        val remainder = getRemainder()
         val geofence = Geofence.Builder()
-                .setRequestId(getRemainder().id)
-                .setCircularRegion(
-                    _viewModel.latitude.value ?: 0.0,
-                    _viewModel.longitude.value ?: 0.0,
-                    GEOFENCE_RADIUS_IN_METERS
-                )
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-                .build()
+            .setRequestId(remainder.id)
+            .setCircularRegion(
+                _viewModel.latitude.value ?: 0.0,
+                _viewModel.longitude.value ?: 0.0,
+                GEOFENCE_RADIUS_IN_METERS
+            )
+            .setExpirationDuration(Geofence.NEVER_EXPIRE)
+            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+            .build()
 
 
         val geofencingRequest = geofence.let {
@@ -254,7 +250,7 @@ class SaveReminderFragment : BaseFragment() {
                 )
                     .show()
                 Log.e("Add Geofence", geofence.requestId)
-                addRemainder()
+                addRemainder(remainder)
             }
             addOnFailureListener {
                 Toast.makeText(
