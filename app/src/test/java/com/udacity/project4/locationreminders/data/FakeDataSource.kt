@@ -28,9 +28,14 @@ class FakeDataSource(var remainders: MutableList<ReminderDTO> = mutableListOf())
         if (returnError) {
             return Result.Error("Reminder not found!")
         }
-        return Result.Success(data = remainders.firstOrNull {
-            it.id == id
-        }!!)
+        for(i in remainders){
+            if(i.id == id){
+                return Result.Success(i)
+            }
+            return Result.Error("Reminder not found!")
+
+        }
+        return Result.Error("Reminder not found!")
     }
 
 

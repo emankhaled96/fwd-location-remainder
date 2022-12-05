@@ -55,16 +55,16 @@ class RemindersLocalRepositoryTest {
             "title 1",
             "description 1",
             "location 1",
-            0.0, 0.0,"R1"
+            0.0, 0.0, "R1"
         )
 
         repository.saveReminder(newRemainder)
         // WHEN : get remainder by Id
         val result = repository.getReminder(newRemainder.id)
         // THEN: Verify result
-        
+
         result as Result.Success
-        result.data.let{
+        result.data.let {
             assertThat(it.title, `is`(newRemainder.title))
             assertThat(it.description, `is`(newRemainder.description))
             assertThat(it.longitude, `is`(newRemainder.longitude))
@@ -73,18 +73,16 @@ class RemindersLocalRepositoryTest {
 
         }
     }
+
     @Test
-    fun saveRemainder_getRemainderByID_Error() = runBlocking {
-        // GIVEN : New Remainder and Save it
-
-       repository.deleteAllReminders()
-        // WHEN : get remainder by Id
+    fun getRemainderByID_Error() = runBlocking {
         val result = repository.getReminder("R1")
-        // THEN: Verify result
 
+        Assert.assertTrue((result is Result.Error))
         result as Result.Error
         assertThat(result.message, `is`("Reminder not found!"))
     }
+
     @Test
     fun saveRemainders_GetAllRemainders() = runBlocking {
         // GIVEN : New Remainder and Save it
