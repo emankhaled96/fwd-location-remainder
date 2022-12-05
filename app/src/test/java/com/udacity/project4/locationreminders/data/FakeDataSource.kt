@@ -25,7 +25,7 @@ class FakeDataSource(var remainders: MutableList<ReminderDTO> = mutableListOf())
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        if (remainders.firstOrNull { it.id == id } == null) {
+        if (returnError) {
             return Result.Error("Reminder not found!")
         }
         return Result.Success(data = remainders.firstOrNull {
