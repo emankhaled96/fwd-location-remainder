@@ -53,7 +53,7 @@ class RemindersLocalRepository(
                 return@withContext Result.Error("Reminder not found!")
             }
         } catch (e: Exception) {
-            return@withContext Result.Error(e.localizedMessage)
+            return@withContext Result.Error("Exception" )
         }
     }
 

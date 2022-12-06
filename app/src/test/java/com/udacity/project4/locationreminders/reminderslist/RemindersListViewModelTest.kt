@@ -74,7 +74,6 @@ class RemindersListViewModelTest {
         dataSource.setError(true)
         remainderListViewModel.loadReminders()
         Assert.assertEquals("Test Exception", remainderListViewModel.showSnackBar.getOrAwaitValue())
-
     }
 
     @After
